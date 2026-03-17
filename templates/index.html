@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anime Recommendation System</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='greentheme.css') }}" id="theme-green" disabled>
-    <link rel="stylesheet" href="{{ url_for('static', filename='orangetheme.css') }}" id="theme-orange" disabled>
     <link rel="stylesheet" href="{{ url_for('static', filename='purpletheme.css') }}" id="theme-purple">
+    <link rel="preload" href="{{ url_for('static', filename='purpletheme.css') }}" as="style">
 
     <style>
         /* Critical CSS - Sayfa yükleme sırasında görünümü engellemek için */
@@ -233,16 +232,12 @@
         let malLogoUrl = '';
         let currentTheme = 'purple';
 
-        // Page loading optimization
         function initializePage() {
-            // Hide loader after everything is loaded
             const pageLoader = document.getElementById('pageLoader');
             const html = document.documentElement;
 
-            // Add loaded class to html
             html.classList.add('loaded');
 
-            // Hide loader with animation
             setTimeout(() => {
                 pageLoader.classList.add('hidden');
                 setTimeout(() => {
@@ -251,85 +246,42 @@
             }, 300);
         }
 
-        // Critical resource preloading
         function preloadCriticalResources() {
-            // Preload theme CSS files
-            const themes = ['green', 'orange', 'purple'];
+            const themes = ['purple'];
             themes.forEach(theme => {
                 const link = document.createElement('link');
                 link.rel = 'preload';
                 link.as = 'style';
-                link.href = `{{ url_for('static', filename='${theme}theme.css') }}`;
+                link.href = `/static/${theme}theme.css`;
                 document.head.appendChild(link);
             });
 
-            // Preload commonly used images
-            const commonImages = ['/static/mal-logo.png', '/static/placeholder.jpg'];
-            commonImages.forEach(src => {
-                const img = new Image();
-                img.src = src;
-            });
+     
         }
 
-        // Theme Switcher Functions
         function toggleThemeOptions() {
             const themeOptions = document.getElementById('themeOptions');
             themeOptions.classList.toggle('show');
         }
 
-        function changeTheme(theme) {
-            // Use requestAnimationFrame for smooth transitions
-            requestAnimationFrame(() => {
-                // Disable all theme stylesheets
-                document.getElementById('theme-purple').disabled = true;
-                document.getElementById('theme-green').disabled = true;
-                document.getElementById('theme-orange').disabled = true;
 
-                // Enable selected theme
-                document.getElementById(`theme-${theme}`).disabled = false;
-
-                // Update active theme option
-                document.querySelectorAll('.theme-option').forEach(option => {
-                    option.classList.remove('active');
-                });
-                document.querySelector(`.theme-${theme}`).classList.add('active');
-
-                // Save theme preference
-                localStorage.setItem('selectedTheme', theme);
-                currentTheme = theme;
-
-                // Hide theme options
-                document.getElementById('themeOptions').classList.remove('show');
-            });
-        }
-
-        function loadSavedTheme() {
-            const savedTheme = localStorage.getItem('selectedTheme') || 'purple';
-            changeTheme(savedTheme);
-        }
-
-        // Close theme options when clicking outside
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.theme-switcher')) {
                 document.getElementById('themeOptions').classList.remove('show');
             }
         });
 
-        // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize page loading
             initializePage();
             preloadCriticalResources();
             loadBlacklist();
 
-            loadSavedTheme();
             loadFavorites();
             loadMalLogo();
 
             const searchInput = document.getElementById('animeSearch');
             const dropdown = document.getElementById('animeDropdown');
 
-            // Use debouncing for search
             let searchTimeout;
             searchInput.addEventListener('input', function() {
                 clearTimeout(searchTimeout);
@@ -341,10 +293,9 @@
                     } else {
                         hideDropdown();
                     }
-                }, 300); // 300ms debounce
+                }, 300); 
             });
 
-            // Hide dropdown when clicking outside
             document.addEventListener('click', function(e) {
                 if (!e.target.closest('.search-container')) {
                     hideDropdown();
@@ -352,10 +303,8 @@
             });
         });
 
-        // Load MAL logo from backend with caching
         async function loadMalLogo() {
             try {
-                // Check cache first
                 const cachedLogo = localStorage.getItem('malLogoUrl');
                 if (cachedLogo) {
                     malLogoUrl = cachedLogo;
@@ -373,11 +322,9 @@
             }
         }
 
-        // Search animes with caching
         let searchCache = new Map();
         async function searchAnimes(query) {
             try {
-                // Check cache first
                 if (searchCache.has(query)) {
                     showDropdown(searchCache.get(query));
                     return;
@@ -386,10 +333,8 @@
                 const response = await fetch(`/api/search_animes?q=${encodeURIComponent(query)}`);
                 const animes = await response.json();
 
-                // Cache the result
                 searchCache.set(query, animes);
 
-                // Limit cache size
                 if (searchCache.size > 50) {
                     const firstKey = searchCache.keys().next().value;
                     searchCache.delete(firstKey);
@@ -401,16 +346,13 @@
             }
         }
 
-        // Show dropdown with optimized rendering
         function showDropdown(animes) {
             const dropdown = document.getElementById('animeDropdown');
 
-            // Use requestAnimationFrame for smooth rendering
             requestAnimationFrame(() => {
                 dropdown.innerHTML = '';
                 dropdown.style.display = 'block';
 
-                // Use DocumentFragment for better performance
                 const fragment = document.createDocumentFragment();
 
                 if (animes.length === 0) {
@@ -430,14 +372,12 @@
 
                 dropdown.appendChild(fragment);
 
-                // Show with animation
                 setTimeout(() => {
                     dropdown.classList.add('show');
                 }, 50);
             });
         }
 
-        // Hide dropdown - optimized version
         function hideDropdown() {
             const dropdown = document.getElementById('animeDropdown');
             dropdown.classList.remove('show');
@@ -448,7 +388,6 @@
             }, 300);
         }
 
-        // Add anime to favorites
         async function addToFavorites(animeId, animeName) {
             try {
                 const response = await fetch('/api/add_favorite', {
@@ -477,7 +416,6 @@
             }
         }
 
-        // Remove from favorites
         async function removeFromFavorites(animeId) {
             try {
                 const response = await fetch('/api/remove_favorite', {
@@ -503,7 +441,6 @@
             }
         }
 
-        // Remove from favorites
         async function removeFromFavorites(animeId) {
             try {
                 const response = await fetch('/api/remove_favorite', {
@@ -529,7 +466,6 @@
             }
         }
 
-        // Load favorites from server
         async function loadFavorites() {
             try {
                 const response = await fetch('/api/get_favorites');
@@ -540,7 +476,6 @@
             }
         }
 
-        // Display favorites with optimized rendering
         function displayFavorites(favorites) {
             const favoritesList = document.getElementById('favoritesList');
 
@@ -564,7 +499,6 @@
             });
         }
 
-        // Clear all favorites
         async function clearFavorites() {
             try {
                 const response = await fetch('/api/clear_favorites', {
@@ -581,14 +515,12 @@
             }
         }
 
-        // Get recommendations
         async function getRecommendations() {
     const recommendationsSection = document.getElementById('recommendationsSection');
     const favoritesSection = document.getElementById('favoritesSection');
     const backButton = document.querySelector('.back-button');
     const recommendationsGrid = document.getElementById('recommendationsGrid');
 
-    // Show loading
     recommendationsGrid.innerHTML = `
         <div class="loading">
             <div class="spinner"></div>
@@ -596,7 +528,6 @@
         </div>
     `;
 
-    // Hide favorites section and show recommendations
     favoritesSection.style.display = 'none';
     recommendationsSection.style.display = 'block';
     backButton.style.display = 'block';
@@ -634,7 +565,6 @@
     }
 }
 
-        // Display recommendations with optimized rendering
         function displayRecommendations(recommendations) {
     const recommendationsGrid = document.getElementById('recommendationsGrid');
 
@@ -739,7 +669,6 @@
             }
         }
 
-        // Show favorites section
         function showFavorites() {
             document.getElementById('favoritesSection').style.display = 'block';
             document.getElementById('recommendationsSection').style.display = 'none';
@@ -747,12 +676,10 @@
             window.scrollTo(0, 0);
         }
 
-        // Show messages
         function showMessage(message, type) {
             alert(message);
         }
 
-        // Add anime to favorites from recommendations
         async function addToFavoritesFromRecommendations(event, animeId, animeName) {
             event.stopPropagation();
 
@@ -804,16 +731,13 @@
         }
 
         function applyFilters() {
-    getRecommendations(); // Artık blacklist otomatik olarak dahil edilecek
+    getRecommendations(); 
 }
 
-        // Page visibility optimization
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
-                // Page is hidden, pause animations
                 document.body.style.animationPlayState = 'paused';
             } else {
-                // Page is visible, resume animations
                 document.body.style.animationPlayState = 'running';
             }
         });
@@ -823,10 +747,8 @@
     const cardWrapper = event.target.closest('.anime-card-wrapper');
     const animeName = cardWrapper.querySelector('.anime-name').textContent;
 
-    // Blacklist'e ekle
     addToBlacklist(animeId, animeName);
 
-    // Smooth animation ile kartı kaldır
     cardWrapper.style.transform = 'scale(0.8)';
     cardWrapper.style.opacity = '0';
     cardWrapper.style.transition = 'all 0.3s ease';
@@ -834,19 +756,16 @@
     setTimeout(() => {
         cardWrapper.remove();
 
-        // Kalan kartları yeniden düzenle
         const remainingCards = document.querySelectorAll('.anime-card-wrapper');
         remainingCards.forEach((card, index) => {
             card.style.animationDelay = `${index * 0.1}s`;
         });
 
-        // Önerileri yeniden al (blacklist ile birlikte)
         getRecommendations();
     }, 300);
 }
         let blacklistedAnimes = [];
 
-// Blacklist yönetimi
 function loadBlacklist() {
     const saved = localStorage.getItem('blacklistedAnimes');
     if (saved) {
@@ -908,7 +827,6 @@ function removeFromBlacklist(animeId) {
     displayBlacklistItems();
 }
 function showCustomConfirm(title, message, onConfirm) {
-    // Modal HTML'ini oluştur
     const modal = document.createElement('div');
     modal.className = 'custom-confirm-modal';
     modal.innerHTML = `
@@ -928,7 +846,6 @@ function showCustomConfirm(title, message, onConfirm) {
 
     document.body.appendChild(modal);
 
-    // Fonksiyonları global olarak erişilebilir yap
     window.confirmAction = () => {
         onConfirm();
         closeCustomConfirm();
@@ -940,7 +857,6 @@ function showCustomConfirm(title, message, onConfirm) {
         delete window.closeCustomConfirm;
     };
 
-    // Modal'ı göster
     setTimeout(() => modal.classList.add('show'), 50);
 }
 function clearBlacklist() {
