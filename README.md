@@ -95,16 +95,10 @@ Install PyTorch from https://pytorch.org/get-started/locally/
 pip install -r requirements.txt
 ```
 
-```bash
-# Preprocess takes up to 30 minutes
-# To avoid this, this script will move the dataset.pkl and negative samples file to preprocessed folder
-python move_files.py         
-```
-
 ### Run Local Host
 
 ```bash
-!python main_local.py \
+python main_local.py \
   --checkpoint-path Data/AnimeRatings/pretrained_bert.pth \
   --dataset-path Data/preprocessed/AnimeRatings_min_rating7-min_uc10-min_sc10-splitleave_one_out/dataset.pkl \
   --animes-path Data/animes.json \
@@ -117,6 +111,13 @@ python move_files.py
 
 ### Train Code 
 You can set parameters in templates.py file
+```bash
+# Preprocess takes up to 30 minutes
+# To avoid this, this script will move the dataset.pkl and negative samples file to preprocessed folder
+# You can run this if you didn't change the data 
+python move_files.py         
+```
+
 ```bash
 # This script will train, validate and test the model.
 python main.py  --template train_bert             
