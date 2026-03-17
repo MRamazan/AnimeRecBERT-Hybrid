@@ -4,7 +4,7 @@ tb-nightly==2.19.0a20241221
 scipy==1.15.1
 tqdm==4.67.1
 future==1.0.0
-pandas==2.0.3
+pandas==2.2.2
 matplotlib==3.10.1
 PyQt5==5.15.11
 flask==3.1.1
